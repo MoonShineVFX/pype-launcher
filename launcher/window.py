@@ -3,16 +3,16 @@ import logging
 
 from Qt import QtWidgets, QtCore, QtGui
 
-from avalon.api import AvalonMongoDB
+from .openpype.mongodb import AvalonMongoDB
 
-from openpype import style
-from openpype.api import resources
+from .openpype import style
+from .openpype import resources
 
-from avalon.tools import lib as tools_lib
-from avalon.tools.widgets import AssetWidget
+from avalon import io
 from avalon.vendor import qtawesome
 from .models import ProjectModel
 from .lib import get_action_label
+from .core.tools.widgets import AssetWidget
 from .widgets import (
     ProjectBar,
     ActionBar,
@@ -280,10 +280,12 @@ class LauncherWindow(QtWidgets.QDialog):
     def __init__(self, parent=None):
         super(LauncherWindow, self).__init__(parent)
 
+        io.install()
+        self.dbcon = AvalonMongoDB(session=io.Session)
+
         self.log = logging.getLogger(
             ".".join([__name__, self.__class__.__name__])
         )
-        self.dbcon = AvalonMongoDB()
 
         self.setWindowTitle("Launcher")
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
@@ -407,7 +409,9 @@ class LauncherWindow(QtWidgets.QDialog):
         # Refresh projects
         self.asset_panel.set_project(project_name)
         self.set_page(1)
-        self.discover_actions()
+        # redundant call, above line already triggered `on_project_changed`
+        #   which also calling `discover_actions`
+        # self.discover_actions()
 
     def on_back_clicked(self):
         self.dbcon.Session["AVALON_PROJECT"] = None

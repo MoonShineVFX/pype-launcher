@@ -1,6 +1,5 @@
 import copy
 import time
-import collections
 from Qt import QtWidgets, QtCore, QtGui
 from avalon.vendor import qtawesome
 
@@ -11,7 +10,6 @@ from .flickcharm import FlickCharm
 from .constants import (
     ACTION_ROLE,
     GROUP_ROLE,
-    VARIANT_GROUP_ROLE,
     ACTION_ID_ROLE,
     ANIMATION_START_ROLE,
     ANIMATION_STATE_ROLE,
@@ -122,10 +120,7 @@ class ActionBar(QtWidgets.QWidget):
         view.setModel(model)
 
         # TODO better group delegate
-        delegate = ActionDelegate(
-            [GROUP_ROLE, VARIANT_GROUP_ROLE],
-            self
-        )
+        delegate = ActionDelegate([GROUP_ROLE], self)
         view.setItemDelegate(delegate)
 
         layout.addWidget(view)
@@ -189,8 +184,7 @@ class ActionBar(QtWidgets.QWidget):
             return
 
         is_group = index.data(GROUP_ROLE)
-        is_variant_group = index.data(VARIANT_GROUP_ROLE)
-        if not is_group and not is_variant_group:
+        if not is_group:
             action = index.data(ACTION_ROLE)
             self._start_animation(index)
             self.action_clicked.emit(action)
@@ -201,57 +195,12 @@ class ActionBar(QtWidgets.QWidget):
         menu = QtWidgets.QMenu(self)
         actions_mapping = {}
 
-        if is_variant_group:
-            for action in actions:
-                menu_action = QtWidgets.QAction(
-                    lib.get_action_label(action)
-                )
-                menu.addAction(menu_action)
-                actions_mapping[menu_action] = action
-        else:
-            by_variant_label = collections.defaultdict(list)
-            orders = []
-            for action in actions:
-                # Lable variants
-                label = getattr(action, "label", None)
-                label_variant = getattr(action, "label_variant", None)
-                if label_variant and not label:
-                    label_variant = None
-
-                if not label_variant:
-                    orders.append(action)
-                    continue
-
-                if label not in orders:
-                    orders.append(label)
-                by_variant_label[label].append(action)
-
-            for action_item in orders:
-                actions = by_variant_label.get(action_item)
-                if not actions:
-                    action = action_item
-                elif len(actions) == 1:
-                    action = actions[0]
-                else:
-                    action = None
-
-                if action:
-                    menu_action = QtWidgets.QAction(
-                        lib.get_action_label(action)
-                    )
-                    menu.addAction(menu_action)
-                    actions_mapping[menu_action] = action
-                    continue
-
-                sub_menu = QtWidgets.QMenu(label, menu)
-                for action in actions:
-                    menu_action = QtWidgets.QAction(
-                        lib.get_action_label(action)
-                    )
-                    sub_menu.addAction(menu_action)
-                    actions_mapping[menu_action] = action
-
-                menu.addMenu(sub_menu)
+        for action in actions:
+            menu_action = QtWidgets.QAction(
+                lib.get_action_label(action)
+            )
+            menu.addAction(menu_action)
+            actions_mapping[menu_action] = action
 
         result = menu.exec_(QtGui.QCursor.pos())
         if result:

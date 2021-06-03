@@ -17,7 +17,7 @@ provides a bridge between the file-based project inventory and configuration.
 import os
 from Qt import QtGui
 from avalon.vendor import qtawesome
-from openpype.api import resources
+from .openpype import resources
 
 ICON_CACHE = {}
 NOT_FOUND = type("NotFound", (object, ), {})
@@ -59,11 +59,4 @@ def get_action_icon(action):
 
 
 def get_action_label(action):
-    label = getattr(action, "label", None)
-    if not label:
-        return action.name
-
-    label_variant = getattr(action, "label_variant", None)
-    if not label_variant:
-        return label
-    return " ".join([label, label_variant])
+    return getattr(action, "label", action.name)
