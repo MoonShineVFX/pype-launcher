@@ -61,26 +61,8 @@ def cli():
             dependency, os.path.dirname(lib.__file__))
         )
 
-    return show()
-
-
-def show():
-    from Qt import QtWidgets
-    from . import install
-    from .window import LauncherWindow
-
-    install()
-
-    app = QtWidgets.QApplication()
-    window = LauncherWindow()
-    window.show()
-
-    # Set current project by default if it's set.
-    project_name = window.dbcon.Session.get("AVALON_PROJECT")
-    if project_name:
-        window.on_project_clicked(project_name)
-
-    return app.exec_()
+    from . import app
+    return app.main()
 
 
 sys.exit(cli())

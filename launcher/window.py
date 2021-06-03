@@ -274,7 +274,6 @@ class LauncherWindow(QtWidgets.QDialog):
     def __init__(self, parent=None):
         super(LauncherWindow, self).__init__(parent)
 
-        io.install()
         self.dbcon = AvalonMongoDB(session=io.Session)
 
         self.log = logging.getLogger(
@@ -284,9 +283,6 @@ class LauncherWindow(QtWidgets.QDialog):
         self.setWindowTitle("Launcher")
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose, False)
-
-        icon = QtGui.QIcon(resources.pype_icon_filepath())
-        self.setWindowIcon(icon)
         self.setStyleSheet(style.load_stylesheet())
 
         # Allow minimize

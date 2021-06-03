@@ -23,6 +23,13 @@ ICON_CACHE = {}
 NOT_FOUND = type("NotFound", (object, ), {})
 
 
+def core_resource(*path):
+    import avalon
+    res_root = os.path.dirname(os.path.dirname(avalon.__file__))
+    path = os.path.join(res_root, "res", *path)
+    return path.replace("\\", "/")
+
+
 def get_action_icon(action):
     icon_name = action.icon
     if not icon_name:
