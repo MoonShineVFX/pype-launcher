@@ -197,12 +197,6 @@ class AssetsPanel(QtWidgets.QWidget):
         self.tasks_widget = tasks_widget
         self._btn_back = btn_back
 
-        # Force initial refresh for the assets since we might not be
-        # trigging a Project switch if we click the project that was set
-        # prior to launching the Launcher
-        # todo: remove this behavior when AVALON_PROJECT is not required
-        assets_widget.refresh()
-
     def showEvent(self, event):
         super(AssetsPanel, self).showEvent(event)
 

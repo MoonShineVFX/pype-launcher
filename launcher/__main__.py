@@ -75,6 +75,11 @@ def show():
     window = LauncherWindow()
     window.show()
 
+    # Set current project by default if it's set.
+    project_name = window.dbcon.Session.get("AVALON_PROJECT")
+    if project_name:
+        window.on_project_clicked(project_name)
+
     return app.exec_()
 
 

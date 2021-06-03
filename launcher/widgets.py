@@ -55,11 +55,6 @@ class ProjectBar(QtWidgets.QWidget):
         # Signals
         self.project_combobox.currentIndexChanged.connect(self.project_changed)
 
-        # Set current project by default if it's set.
-        project_name = self.dbcon.Session.get("AVALON_PROJECT")
-        if project_name:
-            self.set_project(project_name)
-
     def get_current_project(self):
         return self.project_combobox.currentText()
 
