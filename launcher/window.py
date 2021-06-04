@@ -215,11 +215,7 @@ class AssetsPanel(QtWidgets.QWidget):
         self.on_project_changed()
 
     def on_project_changed(self):
-        project_name = self.project_bar.get_current_project()
-        self.dbcon.Session["AVALON_PROJECT"] = project_name
-
         self.session_changed.emit()
-
         self.assets_widget.refresh()
 
     def on_asset_changed(self):
@@ -381,6 +377,12 @@ class LauncherWindow(QtWidgets.QDialog):
         project_name = self.asset_panel.project_bar.get_current_project()
         self.dbcon.Session["AVALON_PROJECT"] = project_name
 
+        # Use project root if exists or default root will be used
+        project_doc = self.dbcon.find_one({"type": "project"})
+        root = project_doc["data"].get("root")
+        if root:
+            self.dbcon.Session["AVALON_PROJECTS"] = root
+
         # Update the Action plug-ins available for the current project
         self.discover_actions()
 
@@ -399,9 +401,6 @@ class LauncherWindow(QtWidgets.QDialog):
         # Refresh projects
         self.asset_panel.set_project(project_name)
         self.set_page(1)
-        # redundant call, above line already triggered `on_project_changed`
-        #   which also calling `discover_actions`
-        # self.discover_actions()
 
     def on_back_clicked(self):
         self.dbcon.Session["AVALON_PROJECT"] = None

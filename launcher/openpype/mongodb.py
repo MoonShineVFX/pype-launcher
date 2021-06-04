@@ -364,7 +364,7 @@ class AvalonMongoDB:
 
     @requires_install
     @auto_reconnect
-    def projects(self):
+    def projects(self, projection=None):
         """List available projects
 
         Returns:
@@ -376,9 +376,10 @@ class AvalonMongoDB:
                 continue
 
             # Each collection will have exactly one project document
-            document = self._database[project_name].find_one({
-                "type": "project"
-            })
+            document = self._database[project_name].find_one(
+                {"type": "project"},
+                projection=projection,
+            )
             if document is not None:
                 yield document
 

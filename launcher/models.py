@@ -1,5 +1,8 @@
+
+import os
 import uuid
 import copy
+import getpass
 import logging
 import collections
 
@@ -290,22 +293,28 @@ class ProjectModel(QtGui.QStandardItemModel):
         self.clear()
         self.beginResetModel()
 
-        for project_doc in self.get_projects():
-            item = QtGui.QStandardItem(self.project_icon, project_doc["name"])
+        for name in sorted(self.get_project_names()):
+            item = QtGui.QStandardItem(self.project_icon, name)
             self.appendRow(item)
 
         self.endResetModel()
 
-    def get_projects(self):
-        project_docs = []
-        for project_doc in sorted(
-            self.dbcon.projects(), key=lambda x: x["name"]
-        ):
-            if (
-                self.hide_invisible
-                and not project_doc["data"].get("visible", True)
-            ):
-                continue
-            project_docs.append(project_doc)
+    def get_project_names(self):
 
-        return project_docs
+        def project_visible(data):
+            return self.hide_invisible and not data.get("visible", True)
+
+        def project_member(data):
+            user = getpass.getuser().lower()
+            member = data.get("role", dict()).get("member", list())
+            return user in member
+
+        project_active = (project_member
+                          if os.getenv("AVALON_LAUNCHER_USE_PROJECT_MEMBER")
+                          else project_visible)
+
+        projection = {"name": 1, "data.visible": 1, "data.role": 1}
+        for project_doc in self.dbcon.projects(projection=projection):
+
+            if project_active(project_doc["data"]):
+                yield project_doc["name"]
